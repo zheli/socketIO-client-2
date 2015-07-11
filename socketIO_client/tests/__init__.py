@@ -9,6 +9,7 @@ HOST = 'localhost'
 PORT = 9000
 DATA = 'xxx'
 PAYLOAD = {'xxx': 'yyy'}
+BIN_DATA = '\xff\xff\xff'
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -59,6 +60,15 @@ class BaseMixin(object):
             'emit_with_multiple_payloads_response': (PAYLOAD, PAYLOAD),
         })
 
+    def test_emit_with_binary_payload(self):
+        'Emit with binary payload'
+        namespace = self.socketIO.define(Namespace)
+        self.socketIO.emit('emit_with_binary_payload', BIN_DATA, binary=True)
+        self.socketIO.wait(self.wait_time_in_seconds)
+        self.assertEqual(namespace.args_by_event, {
+            'emit_with_binary_payload_response': (BIN_DATA,),
+        })
+
     def test_emit_with_callback(self):
         'Emit with callback'
         self.socketIO.emit('emit_with_callback', self.on_response)
@@ -99,6 +109,13 @@ class BaseMixin(object):
         self.socketIO.send(DATA)
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.response, DATA)
+
+    def test_send_with_binary_data(self):
+        'Send with binary data'
+        namespace = self.socketIO.define(Namespace)
+        self.socketIO.send(BIN_DATA, binary=True)
+        self.socketIO.wait(self.wait_time_in_seconds)
+        self.assertEqual(namespace.response, BIN_DATA)
 
     def test_ack(self):
         'Respond to a server callback request'
