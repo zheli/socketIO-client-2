@@ -41,6 +41,9 @@ Launch your socket.io server. ::
     DEBUG=* node $PACKAGE_FOLDER/tests/serve.js
     # Start proxy server in a separate terminal on the same machine
     DEBUG=* node $PACKAGE_FOLDER/tests/proxy.js
+    # To run the tests in a third terminal
+    cd $PACKAGE_FOLDER
+    nosetests --with-coverage --cover-package=socketIO_client tests/
 
 For debugging information, run these commands first. ::
 
