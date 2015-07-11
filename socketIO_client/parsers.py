@@ -86,7 +86,9 @@ def parse_socketIO_packet_data(socketIO_packet_data):
 
 
 def format_packet_text(packet_type, packet_data):
-    return encode_string(str(packet_type) + packet_data)
+    if not isinstance(packet_type, str):
+        return encode_string(str(packet_type) + packet_data)
+    return packet_type + packet_data
 
 
 def parse_packet_text(packet_text):

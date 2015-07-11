@@ -197,8 +197,8 @@ class EngineIO(LoggingMixin):
             engineIO_packet_type, engineIO_packet_data)
 
     @retry
-    def _message(self, engineIO_packet_data, with_transport_instance=False):
-        engineIO_packet_type = 4
+    def _message(self, engineIO_packet_data, with_transport_instance=False, binary=False):
+        engineIO_packet_type = chr(4) if binary else 4
         if with_transport_instance:
             transport = self._transport_instance
         else:
@@ -401,10 +401,19 @@ class SocketIO(EngineIO):
         path = kw.get('path', '')
         callback, args = find_callback(args, kw)
         ack_id = self._set_ack_callback(callback) if callback else None
+        binary_data = args[0]
+        if kw.get('binary'):
+            socketIO_packet_type = 5
+            args = {'_placeholder': True, 'num': 0}
+        else:
+            socketIO_packet_type = 2
         args = [event] + list(args)
-        socketIO_packet_type = 2
         socketIO_packet_data = format_socketIO_packet_data(path, ack_id, args)
         self._message(str(socketIO_packet_type) + socketIO_packet_data)
+
+        if kw.get('binary'):
+            print binary_data
+            self._message(binary_data, binary=True)
 
     def send(self, data='', callback=None, **kw):
         path = kw.get('path', '')
