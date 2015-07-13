@@ -326,6 +326,7 @@ class SocketIO(EngineIO):
         self._namespace_by_path = {}
         self._callback_by_ack_id = {}
         self._ack_id = 0
+        self.placeholder = None
         super(SocketIO, self).__init__(
             host, port, Namespace, wait_for_connection, transports,
             resource, hurry_interval_in_seconds, **kw)
@@ -448,6 +449,22 @@ class SocketIO(EngineIO):
         self._debug('[socket.io packet received] %s', engineIO_packet_data)
         socketIO_packet_type = get_int(engineIO_packet_data, 0)
         socketIO_packet_data = engineIO_packet_data[1:]
+
+        if self.placeholder:
+            self.placeholder.add(engineIO_packet_data)
+
+            if not self.placeholder.finished:
+                return engineIO_packet_data
+
+            namespace = self.get_namespace(self.placeholder.path)
+            if self.placeholder.ack_id:
+                self._process_parsed_ack(self.placeholder, namespace)
+            else:
+                self._process_parsed_event(self.placeholder, namespace)
+
+            self.placeholder = None
+            return engineIO_packet_data
+
         # Launch callbacks
         path = get_namespace_path(socketIO_packet_data)
         namespace = self.get_namespace(path)
@@ -476,30 +493,34 @@ class SocketIO(EngineIO):
         namespace._find_packet_callback('disconnect')()
 
     def _on_event(self, data, namespace):
-        data_parsed = parse_socketIO_packet_data(data)
-        args = data_parsed.args
+        self._process_parsed_event(parse_socketIO_packet_data(data), namespace)
+
+    def _process_parsed_event(self, data, namespace):
+        args = data.args
         try:
             event = args.pop(0)
         except IndexError:
             raise PacketError('missing event name')
-        if data_parsed.ack_id is not None:
+        if data.ack_id is not None:
             args.append(self._prepare_to_send_ack(
-                data_parsed.path, data_parsed.ack_id))
+                data.path, data.ack_id))
         namespace._find_packet_callback(event)(*args)
 
     def _on_ack(self, data, namespace):
-        data_parsed = parse_socketIO_packet_data(data)
+        self._process_parsed_ack(parse_socketIO_packet_data(data), namespace)
+
+    def _process_parsed_ack(self, data, namespace):
         try:
-            ack_callback = self._get_ack_callback(data_parsed.ack_id)
+            ack_callback = self._get_ack_callback(data.ack_id)
         except KeyError:
             return
-        ack_callback(*data_parsed.args)
+        ack_callback(*data.args)
 
     def _on_error(self, data, namespace):
         namespace._find_packet_callback('error')(data)
 
     def _on_binary_event(self, data, namespace):
-        self._warn('[not implemented] binary event')
+        self.placeholder = parse_socketIO_packet_data(data)
 
     def _on_binary_ack(self, data, namespace):
         self._warn('[not implemented] binary ack')
