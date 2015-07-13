@@ -13,6 +13,13 @@ except NameError:
     memoryview = buffer
 
 
+def get_int(*args):
+    try:
+        return int(get_character(*args))
+    except ValueError:
+        return ord(get_character(*args))
+
+
 def get_character(x, index):
     return chr(get_byte(x, index))
 

@@ -1,3 +1,5 @@
+from base64 import b64encode, b64decode
+
 from .exceptions import ConnectionError, TimeoutError, PacketError
 from .heartbeats import HeartbeatThread
 from .logs import LoggingMixin
@@ -8,7 +10,7 @@ from .parsers import (
     parse_host, parse_engineIO_session,
     format_socketIO_packet_data, parse_socketIO_packet_data,
     get_namespace_path)
-from .symmetries import get_character
+from .symmetries import get_character, get_int
 from .transports import (
     WebsocketTransport, XHR_PollingTransport, prepare_http_session, TRANSPORTS)
 
@@ -198,7 +200,7 @@ class EngineIO(LoggingMixin):
 
     @retry
     def _message(self, engineIO_packet_data, with_transport_instance=False, binary=False):
-        engineIO_packet_type = chr(4) if binary else 4
+        engineIO_packet_type = 'b4' if binary else 4
         if with_transport_instance:
             transport = self._transport_instance
         else:
@@ -403,8 +405,8 @@ class SocketIO(EngineIO):
         ack_id = self._set_ack_callback(callback) if callback else None
         binary_data = args[0]
         if kw.get('binary'):
-            socketIO_packet_type = 5
-            args = {'_placeholder': True, 'num': 0}
+            socketIO_packet_type = '51-'
+            args = ({'_placeholder': True, 'num': 0}, )
         else:
             socketIO_packet_type = 2
         args = [event] + list(args)
@@ -412,8 +414,7 @@ class SocketIO(EngineIO):
         self._message(str(socketIO_packet_type) + socketIO_packet_data)
 
         if kw.get('binary'):
-            print binary_data
-            self._message(binary_data, binary=True)
+            self._message(b64encode(binary_data), binary=True)
 
     def send(self, data='', callback=None, **kw):
         path = kw.get('path', '')
@@ -449,7 +450,7 @@ class SocketIO(EngineIO):
         if engineIO_packet_data is None:
             return
         self._debug('[socket.io packet received] %s', engineIO_packet_data)
-        socketIO_packet_type = int(get_character(engineIO_packet_data, 0))
+        socketIO_packet_type = get_int(engineIO_packet_data, 0)
         socketIO_packet_data = engineIO_packet_data[1:]
         # Launch callbacks
         path = get_namespace_path(socketIO_packet_data)

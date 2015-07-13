@@ -2,7 +2,7 @@ import json
 from collections import namedtuple
 
 from .symmetries import (
-    decode_string, encode_string, get_byte, get_character, parse_url)
+    decode_string, encode_string, get_byte, get_character, get_int, parse_url)
 
 
 EngineIOSession = namedtuple('EngineIOSession', [
@@ -86,13 +86,11 @@ def parse_socketIO_packet_data(socketIO_packet_data):
 
 
 def format_packet_text(packet_type, packet_data):
-    if not isinstance(packet_type, str):
-        return encode_string(str(packet_type) + packet_data)
-    return packet_type + packet_data
+    return encode_string(str(packet_type) + packet_data)
 
 
 def parse_packet_text(packet_text):
-    packet_type = int(get_character(packet_text, 0))
+    packet_type = get_int(packet_text, 0)
     packet_data = packet_text[1:]
     return packet_type, packet_data
 
