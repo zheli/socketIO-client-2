@@ -9,7 +9,11 @@ HOST = 'localhost'
 PORT = 9000
 DATA = 'xxx'
 PAYLOAD = {'xxx': 'yyy'}
-BIN_DATA = '\xff\xff\xff'
+BIN_DATA = bytearray('\xff\xff\xff')
+BIN_PAYLOAD = {
+    'data': BIN_DATA,
+    'array': [bytearray('\xee'), bytearray('\xdd')]
+}
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -63,10 +67,10 @@ class BaseMixin(object):
     def test_emit_with_binary_payload(self):
         'Emit with binary payload'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.emit('emit_with_binary_payload', BIN_DATA, binary=True)
+        self.socketIO.emit('emit_with_binary_payload', BIN_PAYLOAD)
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.args_by_event, {
-            'emit_with_binary_payload_response': (BIN_DATA,),
+            'emit_with_binary_payload_response': (BIN_PAYLOAD,),
         })
 
     def test_emit_with_callback(self):

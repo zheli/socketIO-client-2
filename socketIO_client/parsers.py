@@ -1,5 +1,6 @@
 import json
 from collections import namedtuple
+from base64 import b64encode
 
 from .symmetries import (
     decode_string, encode_string, get_byte, get_character, get_int, parse_url)
@@ -53,13 +54,36 @@ def decode_engineIO_content(content):
         yield engineIO_packet_type, engineIO_packet_data
 
 
+def replace_binary(obj, binary_packets):
+    if isinstance(obj, bytearray):
+        binary_packets.append(b64encode(obj))
+        return {'_placeholder': True, 'num': len(binary_packets) - 1}
+    elif isinstance(obj, dict):
+        for key, value in obj.iteritems():
+            obj[key] = replace_binary(value, binary_packets)
+        return obj
+    elif isinstance(obj, (tuple, list)):
+        obj_type = type(obj).__name__
+        obj = list(obj)
+        for i, value in enumerate(obj):
+            obj[i] = replace_binary(value, binary_packets)
+        return __builtins__[obj_type](obj)
+    else:
+        return obj
+
+
 def format_socketIO_packet_data(path=None, ack_id=None, args=None):
+    binary_packets = []
+    args = replace_binary(args, binary_packets)
     socketIO_packet_data = json.dumps(args, ensure_ascii=False) if args else ''
     if ack_id is not None:
         socketIO_packet_data = str(ack_id) + socketIO_packet_data
     if path:
         socketIO_packet_data = path + ',' + socketIO_packet_data
-    return socketIO_packet_data
+    if binary_packets:
+        socketIO_packet_data = '%s-%s' % (len(binary_packets),
+                                          socketIO_packet_data)
+    return socketIO_packet_data, binary_packets
 
 
 def parse_socketIO_packet_data(socketIO_packet_data):

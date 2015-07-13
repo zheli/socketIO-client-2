@@ -1,5 +1,3 @@
-from base64 import b64encode, b64decode
-
 from .exceptions import ConnectionError, TimeoutError, PacketError
 from .heartbeats import HeartbeatThread
 from .logs import LoggingMixin
@@ -378,7 +376,7 @@ class SocketIO(EngineIO):
 
     def connect(self, path, with_transport_instance=False):
         socketIO_packet_type = 0
-        socketIO_packet_data = format_socketIO_packet_data(path)
+        socketIO_packet_data, _ = format_socketIO_packet_data(path)
         self._message(
             str(socketIO_packet_type) + socketIO_packet_data,
             with_transport_instance)
@@ -388,7 +386,7 @@ class SocketIO(EngineIO):
             self._close()
         elif path:
             socketIO_packet_type = 1
-            socketIO_packet_data = format_socketIO_packet_data(path)
+            socketIO_packet_data, _ = format_socketIO_packet_data(path)
             try:
                 self._message(str(socketIO_packet_type) + socketIO_packet_data)
             except (TimeoutError, ConnectionError):
@@ -400,21 +398,19 @@ class SocketIO(EngineIO):
             pass
 
     def emit(self, event, *args, **kw):
+        socketIO_packet_type = 2
         path = kw.get('path', '')
         callback, args = find_callback(args, kw)
         ack_id = self._set_ack_callback(callback) if callback else None
-        binary_data = args[0]
-        if kw.get('binary'):
-            socketIO_packet_type = '51-'
-            args = ({'_placeholder': True, 'num': 0}, )
-        else:
-            socketIO_packet_type = 2
         args = [event] + list(args)
-        socketIO_packet_data = format_socketIO_packet_data(path, ack_id, args)
+        socketIO_packet_data, binary_packets = format_socketIO_packet_data(
+            path, ack_id, args)
+        if binary_packets:
+            socketIO_packet_type = 5
         self._message(str(socketIO_packet_type) + socketIO_packet_data)
 
-        if kw.get('binary'):
-            self._message(b64encode(binary_data), binary=True)
+        for packet in binary_packets:
+            self._message(packet, binary=True)
 
     def send(self, data='', callback=None, **kw):
         path = kw.get('path', '')
