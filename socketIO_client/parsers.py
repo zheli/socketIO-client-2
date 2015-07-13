@@ -1,6 +1,7 @@
 import json
 from collections import namedtuple
 from base64 import b64encode
+from copy import deepcopy
 
 from .symmetries import (
     decode_string, encode_string, get_byte, get_character, get_int, parse_url)
@@ -33,6 +34,8 @@ class SocketIOData():
 
         def fn(obj):
             return self.binary_packets[obj['num']]
+
+        self.args = traverse(deepcopy(self.args), predicate, fn)
 
 
 def traverse(obj, predicate, fn):
@@ -105,7 +108,7 @@ def format_socketIO_packet_data(path=None, ack_id=None, args=None):
         return {'_placeholder': True, 'num': len(binary_packets) - 1}
 
     args = traverse(
-        args,
+        deepcopy(args),
         predicate,
         fn
     )
