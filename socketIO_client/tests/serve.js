@@ -52,9 +52,6 @@ io.on('connection', function(socket) {
   socket.on('emit_with_payload', function(payload) {
     socket.emit('emit_with_payload_response', payload);
   });
-  socket.on('emit_with_binary_payload', function(payload) {
-    socket.emit('emit_with_binary_payload_response', payload);
-  });
   socket.on('emit_with_multiple_payloads', function(payload1, payload2) {
     socket.emit('emit_with_multiple_payloads_response', payload1, payload2);
   });
