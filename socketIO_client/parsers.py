@@ -90,11 +90,8 @@ def decode_engineIO_content(content):
     content_index = 0
     content_length = len(content)
     while content_index < content_length:
-        try:
-            content_index, packet_length = _read_packet_length(
-                content, content_index)
-        except IndexError:
-            break
+        content_index, packet_length = _read_packet_length(
+            content, content_index)
         content_index, packet_text = _read_packet_text(
             content, content_index, packet_length)
         engineIO_packet_type, engineIO_packet_data = parse_packet_text(
