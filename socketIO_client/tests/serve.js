@@ -16,6 +16,19 @@ app.listen(9000);
 var io = require('socket.io')(app);
 var PAYLOAD = {'xxx': 'yyy'};
 
+function arr2buf(a) {
+    var buffer = new Buffer(a.length);
+    for (var i = 0; i < a.length; i++) {
+        buffer[i] = a[i];
+    }
+    return buffer;
+}
+var BIN_DATA = arr2buf([255, 255, 255])
+var BIN_PAYLOAD = {
+    'data': BIN_DATA,
+    'array': [arr2buf([238]), arr2buf([221])]
+}
+
 io.on('connection', function(socket) {
   socket.on('message', function(data, fn) {
     if (fn) {
@@ -53,6 +66,9 @@ io.on('connection', function(socket) {
   });
   socket.on('emit_with_callback_with_multiple_payloads', function(fn) {
     fn(PAYLOAD, PAYLOAD);
+  });
+  socket.on('emit_with_callback_with_binary_payload', function(fn) {
+    fn(BIN_PAYLOAD);
   });
   socket.on('emit_with_event', function(payload) {
     socket.emit('emit_with_event_response', payload);

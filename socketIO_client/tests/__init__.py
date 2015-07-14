@@ -1,6 +1,7 @@
 import logging
 import time
 from unittest import TestCase
+from copy import deepcopy
 
 from .. import SocketIO, LoggingNamespace, find_callback
 
@@ -49,7 +50,7 @@ class BaseMixin(object):
     def test_emit_with_payload(self):
         'Emit with payload'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.emit('emit_with_payload', PAYLOAD)
+        self.socketIO.emit('emit_with_payload', deepcopy(PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.args_by_event, {
             'emit_with_payload_response': (PAYLOAD,),
@@ -58,7 +59,10 @@ class BaseMixin(object):
     def test_emit_with_multiple_payloads(self):
         'Emit with multiple payloads'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.emit('emit_with_multiple_payloads', PAYLOAD, PAYLOAD)
+        self.socketIO.emit(
+            'emit_with_multiple_payloads',
+            deepcopy(PAYLOAD),
+            deepcopy(PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.args_by_event, {
             'emit_with_multiple_payloads_response': (PAYLOAD, PAYLOAD),
@@ -67,7 +71,7 @@ class BaseMixin(object):
     def test_emit_with_binary_payload(self):
         'Emit with binary payload'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.emit('emit_with_binary_payload', BIN_PAYLOAD)
+        self.socketIO.emit('emit_with_binary_payload', deepcopy(BIN_PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.args_by_event, {
             'emit_with_binary_payload_response': (BIN_PAYLOAD,),
@@ -93,6 +97,13 @@ class BaseMixin(object):
         self.socketIO.wait_for_callbacks(seconds=self.wait_time_in_seconds)
         self.assertTrue(self.called_on_response)
 
+    def test_emit_with_callback_with_binary_payload(self):
+        'Emit with callback with binary payload'
+        self.socketIO.emit(
+            'emit_with_callback_with_binary_payload', self.on_binary_response)
+        self.socketIO.wait_for_callbacks(seconds=self.wait_time_in_seconds)
+        self.assertTrue(self.called_on_response)
+
     def test_emit_with_event(self):
         'Emit to trigger an event'
         self.socketIO.on('emit_with_event_response', self.on_response)
@@ -110,25 +121,37 @@ class BaseMixin(object):
     def test_send_with_data(self):
         'Send with data'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.send(DATA)
+        self.socketIO.send(deepcopy(DATA))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.response, DATA)
 
     def test_send_with_binary_data(self):
         'Send with binary data'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.send(BIN_DATA, binary=True)
+        self.socketIO.send(deepcopy(BIN_DATA))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.response, BIN_DATA)
 
     def test_ack(self):
         'Respond to a server callback request'
         namespace = self.socketIO.define(Namespace)
-        self.socketIO.emit('trigger_server_expects_callback', PAYLOAD)
+        self.socketIO.emit(
+            'trigger_server_expects_callback', deepcopy(PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(namespace.args_by_event, {
             'server_expects_callback': (PAYLOAD,),
             'server_received_callback': (PAYLOAD,),
+        })
+
+    def test_binary_ack(self):
+        'Respond to a server callback request with binary data'
+        namespace = self.socketIO.define(Namespace)
+        self.socketIO.emit(
+            'trigger_server_expects_callback', deepcopy(BIN_PAYLOAD))
+        self.socketIO.wait(self.wait_time_in_seconds)
+        self.assertEqual(namespace.args_by_event, {
+            'server_expects_callback': (BIN_PAYLOAD,),
+            'server_received_callback': (BIN_PAYLOAD,),
         })
 
     def test_wait_with_disconnect(self):
@@ -145,7 +168,7 @@ class BaseMixin(object):
         main_namespace = self.socketIO.define(Namespace)
         chat_namespace = self.socketIO.define(Namespace, '/chat')
         news_namespace = self.socketIO.define(Namespace, '/news')
-        news_namespace.emit('emit_with_payload', PAYLOAD)
+        news_namespace.emit('emit_with_payload', deepcopy(PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(main_namespace.args_by_event, {})
         self.assertEqual(chat_namespace.args_by_event, {})
@@ -156,7 +179,8 @@ class BaseMixin(object):
     def test_namespace_ack(self):
         'Respond to a server callback request within a namespace'
         chat_namespace = self.socketIO.define(Namespace, '/chat')
-        chat_namespace.emit('trigger_server_expects_callback', PAYLOAD)
+        chat_namespace.emit(
+            'trigger_server_expects_callback', deepcopy(PAYLOAD))
         self.socketIO.wait(self.wait_time_in_seconds)
         self.assertEqual(chat_namespace.args_by_event, {
             'server_expects_callback': (PAYLOAD,),
@@ -169,6 +193,14 @@ class BaseMixin(object):
                 self.assertEqual(arg, PAYLOAD)
             else:
                 self.assertEqual(arg, DATA)
+        self.called_on_response = True
+
+    def on_binary_response(self, *args):
+        for arg in args:
+            if isinstance(arg, dict):
+                self.assertEqual(arg, BIN_PAYLOAD)
+            else:
+                self.assertEqual(arg, BIN_DATA)
         self.called_on_response = True
 
 
