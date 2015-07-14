@@ -195,7 +195,7 @@ def _make_packet_prefix(packet):
 
 
 def _read_packet_length(content, content_index):
-    while get_byte(content, content_index) != 0:
+    while get_byte(content, content_index) not in [0, 1]:
         content_index += 1
     content_index += 1
     packet_length_string = ''
