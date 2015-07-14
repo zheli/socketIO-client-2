@@ -176,6 +176,19 @@ class BaseMixin(object):
             'emit_with_payload_response': (PAYLOAD,),
         })
 
+    def test_namespace_emit_with_binary(self):
+        'Make sure packet encoding works correctly'
+        main_namespace = self.socketIO.define(Namespace)
+        chat_namespace = self.socketIO.define(Namespace, '/chat')
+        news_namespace = self.socketIO.define(Namespace, '/news')
+        news_namespace.emit('emit_with_payload', deepcopy(BIN_PAYLOAD))
+        self.socketIO.wait(self.wait_time_in_seconds)
+        self.assertEqual(main_namespace.args_by_event, {})
+        self.assertEqual(chat_namespace.args_by_event, {})
+        self.assertEqual(news_namespace.args_by_event, {
+            'emit_with_payload_response': (BIN_PAYLOAD,),
+        })
+
     def test_namespace_ack(self):
         'Respond to a server callback request within a namespace'
         chat_namespace = self.socketIO.define(Namespace, '/chat')
