@@ -129,10 +129,12 @@ def parse_socketIO_packet(socketIO_packet):
     packet_type = get_int(socketIO_packet, 0)
 
     packet = decode_string(socketIO_packet[1:])
-    try:
+    # Binary types
+    if packet_type in [5, 6]:
         attachments, packet = packet.split('-', 1)
-    except ValueError:
-        attachments = 0
+    else:
+        attachments = '0'
+
     if packet.startswith('/'):
         try:
             path, packet = packet.split(',', 1)
@@ -141,12 +143,14 @@ def parse_socketIO_packet(socketIO_packet):
             packet = ''
     else:
         path = ''
+
     try:
         ack_id_string, packet = packet.split('[', 1)
         packet = '[' + packet
         ack_id = int(ack_id_string)
     except (ValueError, IndexError):
         ack_id = None
+
     try:
         args = json.loads(packet)
     except ValueError:
