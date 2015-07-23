@@ -106,7 +106,7 @@ def format_socketIO_packet_data(path=None, ack_id=None, args=None):
         return isinstance(obj, bytearray)
 
     def fn(data):
-        binary_packets.append(b64encode(data))
+        binary_packets.append(bytearray(b64encode(six.binary_type(data))))
         return {'_placeholder': True, 'num': len(binary_packets) - 1}
 
     args = traverse(

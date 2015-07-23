@@ -197,8 +197,10 @@ class EngineIO(LoggingMixin):
             engineIO_packet_type, engineIO_packet_data)
 
     @retry
-    def _message(self, engineIO_packet_data, with_transport_instance=False, binary=False):
-        engineIO_packet_type = 'b4' if binary else 4
+    def _message(self, engineIO_packet_data, with_transport_instance=False):
+        engineIO_packet_type = '4'
+        if isinstance(engineIO_packet_data, bytearray):
+            engineIO_packet_type = 'b' + engineIO_packet_type
         if with_transport_instance:
             transport = self._transport_instance
         else:
@@ -411,7 +413,7 @@ class SocketIO(EngineIO):
         self._message(str(socketIO_packet_type) + socketIO_packet_data)
 
         for packet in binary_packets:
-            self._message(packet, binary=True)
+            self._message(packet)
 
     def send(self, data='', callback=None, **kw):
         path = kw.get('path', '')
@@ -429,7 +431,7 @@ class SocketIO(EngineIO):
         self._message(str(socketIO_packet_type) + socketIO_packet_data)
 
         for packet in binary_packets:
-            self._message(packet, binary=True)
+            self._message(packet)
 
     # React
 
