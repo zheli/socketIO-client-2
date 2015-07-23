@@ -10,10 +10,10 @@ HOST = 'localhost'
 PORT = 9000
 DATA = 'xxx'
 PAYLOAD = {'xxx': 'yyy'}
-BIN_DATA = bytearray('\xff\xff\xff')
+BIN_DATA = bytearray(b'\xff\xff\xff')
 BIN_PAYLOAD = {
     'data': BIN_DATA,
-    'array': [bytearray('\xee'), bytearray('\xdd')]
+    'array': [bytearray(b'\xee'), bytearray(b'\xdd')]
 }
 logging.basicConfig(level=logging.DEBUG)
 

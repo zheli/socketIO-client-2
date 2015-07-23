@@ -1,3 +1,4 @@
+import six
 import json
 from collections import namedtuple
 from base64 import b64encode
@@ -47,7 +48,7 @@ def traverse(obj, predicate, fn):
     if predicate(obj):
         return fn(obj)
     elif isinstance(obj, dict):
-        for key, value in obj.iteritems():
+        for key, value in six.iteritems(obj):
             obj[key] = traverse(value, predicate, fn)
         return obj
     elif isinstance(obj, (tuple, list)):
@@ -164,6 +165,8 @@ def parse_socketIO_packet(socketIO_packet):
 
 
 def format_packet_text(packet_type, packet_data):
+    if isinstance(packet_data, bytearray):
+        packet_data = packet_data.decode('utf-8')
     return encode_string(str(packet_type) + packet_data)
 
 
