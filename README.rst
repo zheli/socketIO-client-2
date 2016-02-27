@@ -13,24 +13,15 @@ Installation
 ------------
 Install the package in an isolated environment. ::
 
-    VIRTUAL_ENV=$HOME/.virtualenv
-
-    # Prepare isolated environment
-    virtualenv $VIRTUAL_ENV
-
-    # Activate isolated environment
-    source $VIRTUAL_ENV/bin/activate
-
-    # Install package
-    pip install -U socketIO-client
+    mkvirtualenv your_env_name
+    pip install -U socketIO-client-2
 
 
 Usage
 -----
 Activate isolated environment. ::
 
-    VIRTUAL_ENV=$HOME/.virtualenv
-    source $VIRTUAL_ENV/bin/activate
+    workon your_env_name
 
 Launch your socket.io server. ::
 
