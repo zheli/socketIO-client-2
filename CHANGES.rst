@@ -1,3 +1,8 @@
+0.7.0
+-----
+- Forked package
+- Added binary support
+
 0.6.5
 -----
 - Updated wait loop to be more responsive under websocket transport
