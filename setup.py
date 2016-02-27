@@ -31,7 +31,7 @@ setup(
     keywords='socket.io node.js',
     author='John Feusi',
     author_email='feus4177@gmail.com',
-    url='https://github.com/invisibleroads/socketIO-client-2',
+    url='https://github.com/feus4177/socketIO-client-2',
     install_requires=REQUIREMENTS,
     tests_require=[
         'nose',
