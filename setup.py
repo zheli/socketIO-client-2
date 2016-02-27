@@ -17,7 +17,7 @@ DESCRIPTION = '\n\n'.join(LOAD_TEXT(_) for _ in [
     'CHANGES.rst',
 ])
 setup(
-    name='socketIO_client_2',
+    name='socketIO-client-2',
     version='0.7.0',
     description='A socket.io client library',
     long_description=DESCRIPTION,
@@ -31,7 +31,7 @@ setup(
     keywords='socket.io node.js',
     author='John Feusi',
     author_email='feus4177@gmail.com',
-    url='https://github.com/invisibleroads/socketIO-client-2',
+    url='https://github.com/feus4177/socketIO-client-2',
     install_requires=REQUIREMENTS,
     tests_require=[
         'nose',
