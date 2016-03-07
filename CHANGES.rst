@@ -1,3 +1,11 @@
+0.7.2
+-----
+- NamespaceLogging fix
+
+0.7.1
+-----
+- Updated instructions
+
 0.7.0
 -----
 - Forked package
