@@ -117,6 +117,8 @@ class SocketIONamespace(EngineIONamespace):
             socketIO.define(Namespace)"""
 
     def on_error(self, data):
+        if data == 'Invalid namespace':
+            raise ConnectionAbortedError
         """Called after socket.io sends an error packet.
         You can override this method."""
 
