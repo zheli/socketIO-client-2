@@ -14,7 +14,7 @@ Installation
 Install the package in an isolated environment. ::
 
     mkvirtualenv your_env_name
-    pip install -U socketIO-client-2
+    pip install socketIO-client-2
 
 
 Usage
@@ -23,11 +23,14 @@ Activate isolated environment. ::
 
     workon your_env_name
 
-Launch your socket.io server. ::
+Launch your socket.io server or this provided test server. ::
 
     # Get package folder
     PACKAGE_FOLDER=`python -c "import os, socketIO_client;\
         print(os.path.dirname(socketIO_client.__file__))"`
+    # Install the server dependencies
+    cd $PACKAGE_FOLDER/tests/
+    npm install
     # Start socket.io server
     DEBUG=* node $PACKAGE_FOLDER/tests/serve.js
     # Start proxy server in a separate terminal on the same machine
@@ -145,6 +148,11 @@ Wait forever. ::
 
     socketIO = SocketIO('localhost', 8000)
     socketIO.wait()
+
+
+Contributing
+------------
+I am following the `git-flow <http://nvie.com/posts/a-successful-git-branching-model/>` model put forward by Vincent Driessen. Therefore I ask that you make pull requests to the develop branch. Also, I am supporting Python 2.6, 2.7, and 3.4 so please make sure that your changes are compatible with all three versions. Travis-CI is setup to automatically run the tests with all three Python versions on pull-requests so if you add tests to cover any changes you made then you should be able to see if they are compatible.
 
 
 License
