@@ -1,4 +1,5 @@
 from .logs import LoggingMixin
+from requests.exceptions import ConnectionError
 
 
 class EngineIONamespace(LoggingMixin):
@@ -118,7 +119,7 @@ class SocketIONamespace(EngineIONamespace):
 
     def on_error(self, data):
         if data == 'Invalid namespace':
-            raise ConnectionAbortedError
+            raise ConnectionError
         """Called after socket.io sends an error packet.
         You can override this method."""
 
