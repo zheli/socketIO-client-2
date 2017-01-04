@@ -14,7 +14,7 @@ from .transports import (
 
 
 __all__ = 'SocketIO', 'SocketIONamespace'
-__version__ = '0.6.3'
+__version__ = '0.7.3'
 BaseNamespace = SocketIONamespace
 LoggingNamespace = LoggingSocketIONamespace
 
@@ -175,15 +175,19 @@ class EngineIO(LoggingMixin):
         self._wants_to_close = True
         try:
             self._heartbeat_thread.halt()
+            self._heartbeat_thread.join()
         except AttributeError:
             pass
-        if not self._opened:
+        if not hasattr(self, '_opened') or not self._opened:
+            self._http_session.close()
             return
         engineIO_packet_type = 1
         try:
             self._transport_instance.send_packet(engineIO_packet_type)
         except (TimeoutError, ConnectionError):
             pass
+        self._http_session.close()
+        self._transport_instance.close()
         self._opened = False
 
     def _ping(self, engineIO_packet_data=''):

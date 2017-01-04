@@ -9,3 +9,4 @@ sdist
 .coverage
 node_modules
 htmlcov
+.idea
