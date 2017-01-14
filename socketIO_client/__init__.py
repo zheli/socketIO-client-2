@@ -15,7 +15,13 @@ from .transports import (
 
 
 __all__ = 'SocketIO', 'SocketIONamespace'
-__version__ = get_distribution('socketIO-client-2')
+
+# This won't work during Travis CI test so just put it in a try block.
+try:
+    __version__ = get_distribution('socketIO-client-2')
+except:
+    pass
+
 BaseNamespace = SocketIONamespace
 LoggingNamespace = LoggingSocketIONamespace
 
