@@ -1,3 +1,4 @@
+from pkg_resources import get_distribution
 from .exceptions import ConnectionError, TimeoutError, PacketError
 from .heartbeats import HeartbeatThread
 from .logs import LoggingMixin
@@ -14,7 +15,7 @@ from .transports import (
 
 
 __all__ = 'SocketIO', 'SocketIONamespace'
-__version__ = '0.7.3'
+__version__ = get_distribution('socketIO-client-2')
 BaseNamespace = SocketIONamespace
 LoggingNamespace = LoggingSocketIONamespace
 
