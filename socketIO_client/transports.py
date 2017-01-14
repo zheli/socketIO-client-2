@@ -13,6 +13,14 @@ from .parsers import (
     format_packet_text, parse_packet_text)
 from .symmetries import format_query, memoryview, parse_url
 
+# From https://github.com/invisibleroads/socketIO-client/pull/139#issuecomment-265124962
+try:
+    from ssl import SSLError
+except ImportError:
+    # dummy class of SSLError for ssl none-support environment.
+    class SSLError(Exception):
+        pass
+
 
 if not hasattr(websocket, 'create_connection'):
     sys.exit("""\
@@ -148,7 +156,7 @@ class WebsocketTransport(AbstractTransport):
             packet_text = self._connection.recv()
         except websocket.WebSocketTimeoutException as e:
             raise TimeoutError('recv timed out (%s)' % e)
-        except websocket.SSLError as e:
+        except SSLError as e:
             raise ConnectionError('recv disconnected by SSL (%s)' % e)
         except websocket.WebSocketConnectionClosedException as e:
             raise ConnectionError('recv disconnected (%s)' % e)
